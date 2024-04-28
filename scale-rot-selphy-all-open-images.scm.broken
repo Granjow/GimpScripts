@@ -1,0 +1,39 @@
+(define (scale-and-rotate-all-open-images)
+  (let* ((image-list (gimp-image-list)))
+    (let ((num-images (car image-list))
+           (images (cadr image-list)))
+      (while (> num-images 0)
+        (let* ((image (car images))
+                (drawable (car (gimp-image-get-active-layer image))))
+          ;; Get image dimensions
+          (let* ((width (car (gimp-image-width image)))
+                  (height (car (gimp-image-height image))))
+
+            ;; Rotate the image if it is portrait
+            (when (> height width)
+              (gimp-image-rotate image 1)) ;; 1 is for 90 degrees clockwise rotation
+
+            ;; Scale the image to 814px width while maintaining the aspect ratio
+            (gimp-image-scale image 814 (/ (* 814 height) width)))
+
+          ;; Update the list for the next image
+          (set! images (cdr images))
+          (set! num-images (- num-images 1)))
+        ;; Update the displays
+        (gimp-displays-flush)
+        )))
+  )
+
+;; Register the script with GIMP
+(script-fu-register
+  "scale-and-rotate-all-open-images"             ;; Function name
+  "_Scale and Rotate All Open Images"            ;; Menu label
+  "Scales and rotates all open images."          ;; Description
+  "Your Name"                                    ;; Author
+  "Your Name"                                    ;; Copyright
+  "2023"                                         ;; Date
+  "*"                                            ;; Image types (all types in this case)
+  )
+
+;; Add the script to the scripts menu in GIMP
+(script-fu-menu-register "scale-and-rotate-all-open-images" "<Image>/M_yScripts")
